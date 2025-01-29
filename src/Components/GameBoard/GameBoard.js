@@ -63,12 +63,18 @@ class GameBoard extends Component {
 
     //handle SVG render
     var boardSvg = d3.select(".board_svg");
+    var minecountSvg = d3.select(".mine_count");
 
     const cellSize = 25;
 
+    boardSvg.attr("width", `${cellSize*this.props.width + margin.left + margin.right}px`)
+    minecountSvg.attr("width", `${cellSize*this.props.width + margin.left + margin.right}px`)
+    boardSvg.attr("height", `${cellSize*this.props.height + margin.top + margin.bottom}px`)
+
     // Create board cells
+    var data = board.flat()
     const boardSurface = boardSvg.selectAll(".boardSurface").data([0]).join("g").attr("class", "boardSurface").attr("transform", `translate(${margin.left}, ${margin.top})`);
-    var rects = boardSurface.selectAll(".cell").data(board.flat()).join("rect").attr("class", "cell").attr("x", d => d.col*cellSize).attr("y", d => d.row*cellSize)
+    var rects = boardSurface.selectAll(".cell").data(data).join("rect").attr("class", "cell").attr("x", d => d.col*cellSize).attr("y", d => d.row*cellSize)
       .attr("width", cellSize).attr("height", cellSize).attr("stroke", "black");
 
     //handle rect fill
@@ -76,8 +82,18 @@ class GameBoard extends Component {
 
     //handle event
     rects.on("click", (e, d) => {
-        if (!d.flag) {
-          d.revealed = true;
+        if (!d.flag && !d.revealed) {
+          if (d.value === 0) {
+            cascadeReveal(d.row, d.col)
+            checkForWin();
+          }
+          else {
+            d.revealed = true;
+            if (d.value === -1) {
+              handleLoss();
+            }
+            else checkForWin()
+          }
         }
         updateBoard();
     })
@@ -117,11 +133,67 @@ class GameBoard extends Component {
       //update the text visibility
       boardSurface.selectAll("text").text(d => (d.revealed && d.value > 0 ? d.value : (d.flag ? "🚩" : "")));
     };
+
+    //function for cascading reveal
+    const cascadeReveal = (r, c) => {
+      var queue = [[r, c]];
+
+      while (queue.length > 0) {
+        const [row, col] = queue.shift();
+
+        if (board[row][col].revealed || board[row][col].flag) continue;
+
+        board[row][col].revealed = true;
+
+        if (board[row][col].value === 0) {
+          for (var i = Math.max(0, row - 1); i <= Math.min(bHeight - 1, row + 1); i++) {
+            for (var j = Math.max(0, col - 1); j <= Math.min(bWidth - 1, col + 1); j++) {
+              if (!(i === row && j === col)) {
+                queue.push([i, j]);
+              }
+            }
+          }
+        }
+      }
+
+      updateBoard();
+    }
+
+    const handleLoss = () => {
+      minecountSvg.selectAll("text").data([0]).join("text")
+        .attr("x", (cellSize*this.props.width + margin.left + margin.right)/2).attr("y", 25)
+        .attr("dominant-baseline", "middle").attr("text-anchor", "middle").text(`Game Over`)
+        .attr("font-size", 20).attr("fill", "darkred");
+      
+      rects.on("click", null).on("contextmenu", null);
+    }
+
+    const checkForWin = () => {
+      var won = true;
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].value !== -1 && !data[i].revealed) {
+          won = false;
+          break;
+        }
+      }
+
+      if (won) {
+        minecountSvg.selectAll("text").data([0]).join("text")
+          .attr("x", (cellSize*this.props.width + margin.left + margin.right)/2).attr("y", 25)
+          .attr("dominant-baseline", "middle").attr("text-anchor", "middle").text(`You win!`)
+          .attr("font-size", 20).attr("fill", "green");
+        
+        rects.on("click", null).on("contextmenu", null);
+
+        boardSurface.selectAll("text").text(d => (d.value > 0 ? d.value : (d.flag ? "🚩" : "")));
+      }
+    }
   }
 
   renderMineCount = (count, margin) => {
     var minecountSvg = d3.select(".mine_count");
     minecountSvg.selectAll("text").data([0]).join("text").attr("x", margin.left).attr("y", 25).attr("dominant-baseline", "middle").text(`Mine Count: ${count}`)
+      .attr("fill", "black").attr("font-size", 16).attr("text-anchor", "auto");
   }
 
   getAdjacentMineCount = (board, r, c, maxR, maxC) => {

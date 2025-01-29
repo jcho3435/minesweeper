@@ -3,11 +3,14 @@
 }
 
 .raised_board {
-    max-width: 99.5vw;
     margin: auto;
-    padding: 0px;
+    padding: 0;
     box-shadow: 10px 12px 10px rgba(0, 0, 0, 0.15);
     border: rgb(188, 188, 188) solid 1px;
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 text {
