@@ -37,7 +37,11 @@ class GameSelection extends Component {
   handleGenerateClick = () => {
     var boardRules = {w: this.state.w, h: this.state.h, numMines: this.state.numMines};
     if (this.state.selected === "custom") {
-      boardRules = {w: this.state.customW, h: this.state.customH, numMines: this.state.customMines};
+      var newW = this.state.customW === '' || this.state.customW <= 0 ? 1 : this.state.customW;
+      var newH = this.state.customH === '' || this.state.customH <= 0 ? 1 : this.state.customH;
+      var newMine = this.state.customMines === '' || this.state.customMines <= 0 ? 1 : this.state.customMines;
+      this.setState({customW: newW, customH: newH, customMines: newMine});
+      boardRules = {w: newW, h: newH, numMines: newMine};
     }
     this.props.setBoardRules(boardRules);
   }
@@ -53,16 +57,20 @@ class GameSelection extends Component {
       height: 200,
       mines: customH * customW - 1
     };
-    
+
     switch (e.target.name) {
       case "width":
-        this.setState({customW: value > maxMap[e.target.name] ? maxMap[e.target.name] : value});
+        maxMap.mines = customH * value - 1;
+        this.setState({customW: value > maxMap[e.target.name] ? maxMap[e.target.name] : value, customMines: this.state.customMines > maxMap["mines"] ? maxMap["mines"] : this.state.customMines});
         break;
       case "height":
-        this.setState({customH: value > maxMap[e.target.name] ? maxMap[e.target.name] : value});
+        maxMap.mines = value * customW - 1;
+        this.setState({customH: value > maxMap[e.target.name] ? maxMap[e.target.name] : value, customMines: this.state.customMines > maxMap["mines"] ? maxMap["mines"] : this.state.customMines});
         break;
       case "mines":
         this.setState({customMines: value > maxMap[e.target.name] ? maxMap[e.target.name] : value});
+        break;
+      default:
         break;
     }
   }
