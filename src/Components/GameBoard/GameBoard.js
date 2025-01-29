@@ -95,6 +95,10 @@ class GameBoard extends Component {
             else checkForWin()
           }
         }
+        else if (d.revealed && d.value > 0) {
+          handleRevealedCellClick(d.row, d.col, d.value)
+        }
+
         updateBoard();
     })
       .on("contextmenu", (e, d) => {
@@ -164,7 +168,7 @@ class GameBoard extends Component {
         .attr("x", (cellSize*this.props.width + margin.left + margin.right)/2).attr("y", 25)
         .attr("dominant-baseline", "middle").attr("text-anchor", "middle").text(`Game Over`)
         .attr("font-size", 20).attr("fill", "darkred");
-      
+            
       rects.on("click", null).on("contextmenu", null);
     }
 
@@ -183,10 +187,46 @@ class GameBoard extends Component {
           .attr("dominant-baseline", "middle").attr("text-anchor", "middle").text(`You win!`)
           .attr("font-size", 20).attr("fill", "green");
         
-        rects.on("click", null).on("contextmenu", null);
+        for (i = 0; i < data.length; i++) if (data[i].value === -1) data[i].flag = true;
 
-        boardSurface.selectAll("text").text(d => (d.value > 0 ? d.value : (d.flag ? "🚩" : "")));
+        rects.on("click", null).on("contextmenu", null);
       }
+    }
+
+    const handleRevealedCellClick = (r, c, val) => {
+      //check for flags
+      var flagCount = 0;
+
+      for (var row = Math.max(0, r - 1); row <= Math.min(this.props.height-1, r + 1); row++) {
+        for (var col = Math.max(0, c - 1); col <= Math.min(this.props.width-1, c + 1); col++) {
+          if (row === r && col === c) continue;
+          if (board[row][col].flag) flagCount++;
+        }
+      }
+
+      // if condition is met, reveal all adjacent tiles
+      var hitBomb = false;
+      if (flagCount >= val) {
+        for (row = Math.max(0, r - 1); row <= Math.min(this.props.height-1, r + 1); row++) {
+          for (col = Math.max(0, c - 1); col <= Math.min(this.props.width-1, c + 1); col++) {
+            if (row === r && col === c) continue;
+            if (!board[row][col].flag) {
+              val = board[row][col].value
+              if (val !== 0) {
+                board[row][col].revealed = true;
+                if(val === -1) {
+                  hitBomb = true;
+                }
+              }
+              else {
+                cascadeReveal(row, col)
+              }
+            }
+          }
+        }
+      }
+      if(hitBomb) handleLoss();
+      else checkForWin();
     }
   }
 
