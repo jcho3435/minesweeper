@@ -78,7 +78,7 @@ class GameBoard extends Component {
       .attr("width", cellSize).attr("height", cellSize).attr("stroke", "black");
 
     //handle rect fill
-    rects.attr("fill", (d) => (d.revealed ? (d.value === -1 ? "red" : "white") : "lightgray"))
+    rects.attr("fill", (d) => (d.revealed ? (d.value === -1 ? "red" : "lightgray") : "white"))
 
     //handle event
     rects.on("click", (e, d) => {
@@ -132,7 +132,7 @@ class GameBoard extends Component {
     const updateBoard = () => {
       //update the cell colors based on revealed status
       rects.transition().duration(100)
-      .attr("fill", d => (d.revealed ? (d.value === -1 ? "red" : "white") : "lightgray"));
+      .attr("fill", d => (d.revealed ? (d.value === -1 ? "red" : "lightgray") : "white"));
     
       //update the text visibility
       boardSurface.selectAll("text").text(d => (d.revealed && d.value > 0 ? d.value : (d.flag ? "🚩" : "")));
