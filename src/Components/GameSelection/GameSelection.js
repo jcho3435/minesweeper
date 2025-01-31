@@ -81,7 +81,10 @@ class GameSelection extends Component {
     var maxMines = customH * customW - 1;
     return(
       <div className="form_div">
-        <p className="game_selection_title">Select a board</p>
+        <div className="game_selection_title">
+          <p>Select a board</p>
+        </div>
+        <div className="selection_options">
         <form className="game_selection_form" onChange={this.handleFormChange}>
           <input type="radio" name="easy" value={JSON.stringify({w: 10, h: 10, numMines: 10})} checked={this.state.selected === "easy"} readOnly></input><label htmlFor="easy" onClick={this.handleLabelClick}>Easy: 10x10, 10 mines</label><br />
           <input type="radio" name="normal" value={JSON.stringify({w: 16, h: 16, numMines: 40})} checked={this.state.selected === "normal"} readOnly></input><label htmlFor="normal" onClick={this.handleLabelClick}>Normal: 16x16, 40 mines</label><br />
@@ -94,6 +97,7 @@ class GameSelection extends Component {
           <label>Mines (max {maxMines})</label><input type="number" value={this.state.customMines > maxMines ? maxMines : this.state.customMines} name="mines" onChange={this.handleCustomGameField} min={1} max={maxMines} style={{marginLeft: '5px'}} id="mines" /><br />
         </div>
         <button onClick={this.handleGenerateClick} style={{marginLeft: '21px'}}>Generate Game</button>
+        </div>
       </div>
     )
   }
