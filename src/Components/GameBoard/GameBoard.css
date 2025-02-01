@@ -1,18 +1,20 @@
 .game_board {
-    margin-top: 16px;
+    margin-top: 10%;
 }
 
 .raised_board {
     margin: auto;
     padding: 0;
     box-shadow: 10px 12px 10px rgba(0, 0, 0, 0.15);
-    border: rgb(188, 188, 188) solid 1px;
+    border: rgb(188, 188, 188) solid 3px;
     display: flex;
     flex-direction: column;
     overflow-x: auto;
     white-space: nowrap;
-    align-items: center;
+    align-items:center;
+    border-radius: 20px;
 }
+
 
 text {
     pointer-events: none;
